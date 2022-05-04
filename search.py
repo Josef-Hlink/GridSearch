@@ -12,7 +12,7 @@ def main():
 
 	height, width = 50, 50		# grid dimensions
 	wall_density = .4			# how many walls will be in the grid
-	render_pause = .2			# extra variable for visual_search()
+	render_pause = .2			# extra variable for visual_<search>() methods
 
 	grid = initialize_grid(height, width, wall_density)
 	print_array(grid)
@@ -21,7 +21,7 @@ def main():
 	start: tuple[int, int] = (np.random.randint(1, height-1), np.random.randint(1, width-1))
 	grid[start] = 0
 	
-	# print(f'starting point: {start}')
+	print(f'starting point: {start}')
 
 	tic = time.perf_counter()	# timer start
 
@@ -29,12 +29,14 @@ def main():
 	# res = BFSearch(grid, start)
 	# res = visual_search(grid, start, render_pause)
 	# res = visual_BFSearch(grid, start, render_pause)
+	# res = DFSearch(grid, start)
+	# res = visual_DFSearch(grid, start, render_pause)
 	
-	tac = time.perf_counter()	# timer end
+	toc = time.perf_counter()	# timer end
 
 	print_array(res)
 
-	print(f'search took {(tac-tic)*1000:.3f} ms')	
+	print(f'search took {(toc-tic)*1000:.3f} ms')	
 	print_stats(grid, res)
 
 	quit()
@@ -127,6 +129,7 @@ def visual_search(grid: np.array, start: tuple[int, int] = (1, 1), render_pause:
 
 	return res
 
+
 def BFSearch(grid: np.array, start: tuple[int, int] = (1, 1)) -> np.array:
 	"""
 	Breadth First Search implementation
@@ -192,6 +195,68 @@ def visual_BFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 			else:
 				res[neighbour] = 3
 	
+	return res
+
+
+def DFSearch(grid: np.array, start: tuple[int, int] = (1, 1)) -> np.array:
+	"""
+	Depth First Search implementation
+	"""
+
+	def dfs(res: np.array, visited: set, reachable_from: dict[tuple: set[tuple]], pos: tuple[int, int]):
+		"""recursive dfs algorithm, updates res array"""
+		if pos not in visited:
+			visited.add(pos)
+			res[pos] = 3
+			for neighbour in reachable_from[pos]:
+				dfs(res, visited, reachable_from, neighbour)
+
+	reachable_from = dict()
+	for row in range(1, grid.shape[0]-1):
+		for col in range(1, grid.shape[1]-1):
+			if grid[row,col] == 0:
+				reachable_from.update({(row, col): {nb for move in [(0,-1), (0,1), (-1,0), (1,0)] \
+											if grid[nb:=(row+move[0], col+move[1])] == 0}})
+	
+	res = grid.copy()
+	visited = set()
+	
+	dfs(res, visited, reachable_from, start)
+	res[start] = 2
+
+	return res
+
+def visual_DFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_pause: float = .2) -> np.array:
+	"""
+	same Depth First Search implementation, but with step by step visualization (returns the same result)
+	
+	this visualization is again slightly different from the last one, because DFS recursive properties
+	only allow for rendering every single step
+	"""
+
+	def dfs(visited: set, reachable_from: dict[tuple: set[tuple]], pos: tuple[int, int], render_pause: float = .2):
+		"""recursive dfs algorithm, updates "global" res array"""
+		if pos not in visited:
+			visited.add(pos)
+			res[pos] = 3
+			print_array(res)
+			time.sleep(render_pause)
+			for neighbour in reachable_from[pos]:
+				dfs(visited, reachable_from, neighbour, render_pause)
+
+	reachable_from = dict()
+	for row in range(1, grid.shape[0]-1):
+		for col in range(1, grid.shape[1]-1):
+			if grid[row,col] == 0:
+				reachable_from.update({(row, col): {nb for move in [(0,-1), (0,1), (-1,0), (1,0)] \
+											if grid[nb:=(row+move[0], col+move[1])] == 0}})
+	
+	res = grid.copy()	# will be changed in the recursive dfs function
+	visited = set()
+	
+	dfs(visited, reachable_from, start, render_pause)
+	res[start] = 2
+
 	return res
 
 
