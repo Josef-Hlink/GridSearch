@@ -196,7 +196,7 @@ def DFSearch(grid: np.array, start: tuple[int, int] = (1, 1)) -> np.array:
 	"""
 
 	def dfs(res: np.array, visited: set, reachable_from: dict[tuple: set[tuple]], pos: tuple[int, int]):
-		"""recursive dfs algorithm, updates res array"""
+		"""recursive dfs algorithm, updates "global" res array"""
 		if pos not in visited:
 			visited.add(pos)
 			res[pos] = 3
@@ -226,15 +226,31 @@ def visual_DFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 	only allow for rendering every single step
 	"""
 
-	def dfs(visited: set, reachable_from: dict[tuple: set[tuple]], pos: tuple[int, int], render_pause: float = .2):
-		"""recursive dfs algorithm, updates "global" res array"""
+	def dfs(res: np.array, visited: set, reachable_from: dict[tuple: set[tuple]], pos: tuple[int, int],
+			render_pause: float, prev_idx: int = 0, frontier: set = set()):
+		"""
+		recursive dfs algorithm, does not update "global" res array
+		----
+		it's a lot more complicated than the one in the regular DFSearch algorithm, but luckily
+		I am the only one that has to understand what it does (I don't really)
+		"""
 		if pos not in visited:
 			visited.add(pos)
-			res[pos] = 3
+			frontier.add(pos)
+			res[pos] = 4 if len(visited) != 1 else 2
 			print_array(res)
 			time.sleep(render_pause)
-			for neighbour in reachable_from[pos]:
-				dfs(visited, reachable_from, neighbour, render_pause)
+			for idx, neighbour in enumerate(reachable_from[pos]):
+				if idx == len(reachable_from[pos])-1:
+					res = update(res, frontier)
+				prev_idx = idx
+				dfs(res, visited, reachable_from, neighbour, render_pause, prev_idx, frontier)
+		return res
+	
+	def update(grid: np.array, frontier: set[tuple]) -> np.array:
+		for pos in frontier:
+			grid[pos] = 3 if grid[pos] != 2 else 2
+		return grid
 
 	reachable_from = dict()
 	for row in range(1, grid.shape[0]-1):
@@ -243,11 +259,11 @@ def visual_DFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 				reachable_from.update({(row, col): {nb for move in [(0,-1), (0,1), (-1,0), (1,0)] \
 											if grid[nb:=(row+move[0], col+move[1])] == 0}})
 	
-	res = grid.copy()			# will be changed in the recursive dfs function
+	res = grid.copy()
 	visited = set()
 	
-	dfs(visited, reachable_from, start, render_pause)
-	res[start] = 2
+	res = dfs(res, visited, reachable_from, start, render_pause)
+	print_array(res)
 
 	return res
 
@@ -286,7 +302,7 @@ def print_array(grid: np.array) -> None:
 
 	print()	# spacing
 
-def print_stats(f, grid: np.array, res: np.array, wall_density: float, start: tuple[int, int], \
+def print_stats(f, grid: np.array, res: np.array, wall_density: float, start: tuple[int, int],
 				duration: float, printgrids: bool = True) -> None:
 	"""
 	prints some numbers about the search
@@ -297,7 +313,7 @@ def print_stats(f, grid: np.array, res: np.array, wall_density: float, start: tu
 	_ = print_array(grid) if printgrids else None
 	_ = print(f'starting point: {start}') if printgrids else None
 	_ = print_array(res) if printgrids else None
-	print(f'off all {np.count_nonzero(grid == 0)} empty spaces, {np.count_nonzero(res == 3) + 1} are reachable')
+	print(f'of all {np.count_nonzero(grid == 0)} empty spaces, {np.count_nonzero(res == 3) + 1} are reachable')
 	print(f'search took {(duration)*1000:.3f} ms\n')
 
 
