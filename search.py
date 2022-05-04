@@ -10,7 +10,7 @@ import time
 
 def main():
 
-	height, width = 10, 10		# grid dimensions
+	height, width = 50, 50		# grid dimensions
 	wall_density = .4			# how many walls will be in the grid
 	render_pause = .2			# extra variable for visual_search()
 
@@ -25,9 +25,10 @@ def main():
 
 	tic = time.perf_counter()	# timer start
 
-	# res = search(grid, start)
-	res = BFSearch(grid, start)
+	res = search(grid, start)
+	# res = BFSearch(grid, start)
 	# res = visual_search(grid, start, render_pause)
+	# res = visual_BFSearch(grid, start, render_pause)
 	
 	tac = time.perf_counter()	# timer end
 
@@ -135,7 +136,8 @@ def BFSearch(grid: np.array, start: tuple[int, int] = (1, 1)) -> np.array:
 	for row in range(1, grid.shape[0]-1):
 		for col in range(1, grid.shape[1]-1):
 			if grid[row,col] == 0:
-				reachable_from.update({(row, col): {nb for move in [(0,-1), (0,1), (-1,0), (1,0)] if grid[nb := (row+move[0], col+move[1])] == 0}})
+				reachable_from.update({(row, col): {nb for move in [(0,-1), (0,1), (-1,0), (1,0)] \
+											if grid[nb := (row+move[0], col+move[1])] == 0}})
 	
 	res = grid.copy()
 	visited = set() 	# keep track of visited positions
@@ -151,6 +153,43 @@ def BFSearch(grid: np.array, start: tuple[int, int] = (1, 1)) -> np.array:
 			if neighbour not in visited:
 				visited.add(neighbour)
 				frontier.add(neighbour)
+				res[neighbour] = 3
+	
+	return res
+
+def visual_BFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_pause: float = .2) -> np.array:
+	"""
+	same Breadth First Search implementation, but with step by step visualization (returns the same result)
+	
+	this visualization is slightly different from the last one, because this implementation of BFS doesn't
+	keep a separate set of what the new frontier is
+	"""
+
+	reachable_from = dict()
+	for row in range(1, grid.shape[0]-1):
+		for col in range(1, grid.shape[1]-1):
+			if grid[row,col] == 0:
+				reachable_from.update({(row, col): {nb for move in [(0,-1), (0,1), (-1,0), (1,0)] \
+											if grid[nb := (row+move[0], col+move[1])] == 0}})
+	
+	res = grid.copy()
+	visited = set() 	# keep track of visited positions
+	frontier = set()	# positions to be checked
+
+	visited.add(start)
+	frontier.add(start)
+	res[start] = 2
+
+	while frontier:
+		pos = frontier.pop()
+		print_array(res)
+		time.sleep(render_pause)
+		for neighbour in reachable_from[pos]:
+			if neighbour not in visited:
+				visited.add(neighbour)
+				frontier.add(neighbour)
+				res[neighbour] = 4
+			else:
 				res[neighbour] = 3
 	
 	return res
