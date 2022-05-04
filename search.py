@@ -175,18 +175,22 @@ def visual_BFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 	frontier.add(start)
 	res[start] = 2
 
+	def update_grid(grid: np.array, frontier: set[tuple]) -> np.array:
+		for pos in frontier:
+			grid[pos] = 3 if grid[pos] != 2 else 2
+		return grid
+
 	while frontier:
 		pos = frontier.pop()
-		print_array(res)
-		time.sleep(render_pause)
 		for neighbour in reachable_from[pos]:
 			if neighbour not in visited:
 				visited.add(neighbour)
 				frontier.add(neighbour)
 				res[neighbour] = 4
-			else:
-				res[neighbour] = 3
-	
+		print_array(res)
+		time.sleep(render_pause)
+		res = update_grid(res, visited)
+
 	return res
 
 
@@ -242,12 +246,12 @@ def visual_DFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 			time.sleep(render_pause)
 			for idx, neighbour in enumerate(reachable_from[pos]):
 				if idx == len(reachable_from[pos])-1:
-					res = update(res, frontier)
+					res = update_grid(res, frontier)
 				prev_idx = idx
 				dfs(res, visited, reachable_from, neighbour, render_pause, prev_idx, frontier)
 		return res
 	
-	def update(grid: np.array, frontier: set[tuple]) -> np.array:
+	def update_grid(grid: np.array, frontier: set[tuple]) -> np.array:
 		for pos in frontier:
 			grid[pos] = 3 if grid[pos] != 2 else 2
 		return grid
