@@ -137,7 +137,7 @@ def BFSearch(grid: np.array, start: tuple[int, int] = (1, 1)) -> np.array:
 		for col in range(1, grid.shape[1]-1):
 			if grid[row,col] == 0:
 				reachable_from.update({(row, col): {nb for move in [(0,-1), (0,1), (-1,0), (1,0)] \
-											if grid[nb := (row+move[0], col+move[1])] == 0}})
+											if grid[nb:=(row+move[0], col+move[1])] == 0}})
 	
 	res = grid.copy()
 	visited = set() 	# keep track of visited positions
@@ -170,7 +170,7 @@ def visual_BFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 		for col in range(1, grid.shape[1]-1):
 			if grid[row,col] == 0:
 				reachable_from.update({(row, col): {nb for move in [(0,-1), (0,1), (-1,0), (1,0)] \
-											if grid[nb := (row+move[0], col+move[1])] == 0}})
+											if grid[nb:=(row+move[0], col+move[1])] == 0}})
 	
 	res = grid.copy()
 	visited = set() 	# keep track of visited positions
