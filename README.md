@@ -16,7 +16,10 @@ Depth First Search
 Picks a random position on the frontier and immediately expands its first neighbour, then that neighbour expands its first neighbour, and on and on until a position is found that has no new neighbours to discover.
 In that case, the algorithm moves up recursively to expand other neighbours.
 
-<img src="https://github.com/Josef-Hlink/GridSearch/blob/main/assets/DFS.gif" width="512" height="512" alt="DFS demo" caption="Depth First Search on a 20x20 grid with 40% walls"/>
+<fig>
+  <img src="https://github.com/Josef-Hlink/GridSearch/blob/main/assets/DFS.gif" width="256" height="256" alt="DFS demo"/>
+  <figcaption>Depth First Search on a 20x20 grid with ±40% walls</figcaption>
+</fig>
 
 "Direct" Search
 ---------------
