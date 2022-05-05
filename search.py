@@ -10,8 +10,8 @@ import time
 
 def main():
 
-	height, width = 10, 10		# grid dimensions
-	wall_density = .33			# how many walls will be in the grid
+	height, width = 20, 20		# grid dimensions
+	wall_density = .4			# how many walls will be in the grid
 	render_pause = .2			# extra variable for visual_<search>() methods
 
 	grid = initialize_grid(height, width, wall_density)
@@ -157,8 +157,14 @@ def visual_BFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 	same Breadth First Search implementation, but with step by step visualization (returns the same result)
 	
 	this visualization is slightly different from the last one, because this implementation of BFS doesn't
-	keep a separate set of what the new frontier is
+	iteratively keep a separate set of what the new frontier is
 	"""
+
+	def update_grid(grid: np.array, frontier: set[tuple]) -> np.array:
+		"""for annoying coloring purposes"""
+		for pos in frontier:
+			grid[pos] = 4 if grid[pos] != 2 else 2
+		return grid
 
 	reachable_from = dict()
 	for row in range(1, grid.shape[0]-1):
@@ -175,21 +181,19 @@ def visual_BFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 	frontier.add(start)
 	res[start] = 2
 
-	def update_grid(grid: np.array, frontier: set[tuple]) -> np.array:
-		for pos in frontier:
-			grid[pos] = 3 if grid[pos] != 2 else 2
-		return grid
+	render_pause /= 5	# BFS prints way more iterations when compared to DS
 
 	while frontier:
 		pos = frontier.pop()
+		res[pos] = 3 if res[pos] != 2 else 2
 		for neighbour in reachable_from[pos]:
 			if neighbour not in visited:
 				visited.add(neighbour)
 				frontier.add(neighbour)
-				res[neighbour] = 4
+				res[neighbour] = 4 # if grid[pos] != 2 else 2
 		print_array(res)
 		time.sleep(render_pause)
-		res = update_grid(res, visited)
+		res = update_grid(res, frontier)
 
 	return res
 
@@ -266,6 +270,8 @@ def visual_DFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 	res = grid.copy()
 	visited = set()
 	
+	render_pause /= 2	# DFS also prints some more iterations when compared to DS
+
 	res = dfs(res, visited, reachable_from, start, render_pause)
 	print_array(res)
 
@@ -290,12 +296,12 @@ def print_array(grid: np.array) -> None:
 	prints a colored representation of the grid
 	"""
 
-	# empty space: white
-	# wall: black
-	# starting point: red
-	# reachable position: cyan
-	# frontier: green
-	d = {0: '\033[47m ', 1: '\033[40m ', 2: '\033[41m ', 3: '\033[46m ', 4: '\033[42m '}
+	# 0 | white | empty space 
+	# 1 | black | wall
+	# 2 | red   | starting point
+	# 3 | cyan  | reachable position
+	# 4 | green | frontier
+	d = {0: '\033[47m  ', 1: '\033[40m  ', 2: '\033[41m  ', 3: '\033[46m  ', 4: '\033[42m  '}
 	
 	print()	# spacing
 
