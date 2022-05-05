@@ -235,7 +235,7 @@ def visual_DFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 	"""
 
 	def dfs(res: np.array, visited: set, reachable_from: dict[tuple: set[tuple]], pos: tuple[int, int],
-			render_pause: float, prev_idx: int = 0, frontier: set = set()):
+			render_pause: float, frontier: set = set()):
 		"""
 		recursive dfs algorithm, does not update "global" res array
 		----
@@ -251,8 +251,7 @@ def visual_DFSearch(grid: np.array, start: tuple[int, int] = (1, 1), render_paus
 			for idx, neighbour in enumerate(reachable_from[pos]):
 				if idx == len(reachable_from[pos])-1:
 					res = update_grid(res, frontier)
-				prev_idx = idx
-				dfs(res, visited, reachable_from, neighbour, render_pause, prev_idx, frontier)
+				dfs(res, visited, reachable_from, neighbour, render_pause, frontier)
 		return res
 	
 	def update_grid(grid: np.array, frontier: set[tuple]) -> np.array:
